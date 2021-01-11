@@ -1,0 +1,47 @@
+html {
+	font-size: 16px;
+}
+.list-group-item:first-child {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+}
+.active {
+	background-color: #337ab7;
+	color: #fffff3;
+}
+.pointer {
+	cursor: pointer;
+}
+
+.container {
+	width: 25rem;
+	height: 50rem;
+}
+
+.box {
+	margin-top: 2rem;
+}
+
+.navbar-fixed-top {
+	background-color: white;
+	border-bottom: 1px solid #e0e0e0;
+	padding: 10px 0;
+}
+
+.navbar-fixed-bottom {
+	padding: 0 8px;
+	background-color: white;
+}
+.navbar-fixed-bottom > div {
+	text-align: center;
+	border: 1px solid #BFBFBF;
+	line-height: 2rem;
+}
+
+#project .competitor > a {
+	line-height: 34px;
+}
+#project .competitor .allstart {
+	background-color: white;
+	color: #337ab7;
+}
