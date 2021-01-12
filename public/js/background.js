@@ -2,6 +2,7 @@ var num = 0
 var start_time = null
 var end_time = null
 var run_time = 30000
+var is_run = 'false'
 var res = {}
 var msg = {}
 var base_url = "http://139.155.227.160:8082/"
@@ -15,16 +16,27 @@ setInterval(function(){
 		dataType: 'json',
 		async: true,
 		success: function(data) {
+			console.log(is_run)
+			console.log(data)
 			run_time = data.run_time
+			
+			if(is_run != data.is_run) {
+				if(data.is_run == 'true') {
+					is_run = 'true'
+					competitor(data.domain)
+				} else {
+					is_run = 'false'
+				}
+			}
 		} 
 	});
 }, 1000)
 
-async function competitor(domain, page = 1) {
+async function competitor(domain) {
 	
 	start_time = (new Date()).getTime()
 	
-	msg = await getCrawlerList(base_url, domain, page)
+	msg = await getCrawlerList(base_url, domain)
 	
 	console.log(msg)
 	for (let domain in msg) {	
@@ -54,10 +66,11 @@ async function competitor(domain, page = 1) {
 			console.log(res)
 			await postCrawlerRes(res)
 			res = {}
-			page = page + 1
-			setTimeout(function(){
-				competitor(domain, page)
-			}, 2000)
+			if(is_run == 'true') {
+				setTimeout(function(){
+					competitor(domain)
+				}, 2000)	
+			}
 			clearInterval(interval)
 		}
 	}, 1000)
@@ -75,12 +88,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	}
 })
 
-function getCrawlerList(base_url, domain, page) {
+function getCrawlerList(base_url, domain) {
 	let res_ = null
 	$.ajax({
 		url: base_url + 'provider.php',
 		type: 'get',
-		data: 'domain=' + domain + '&act=' + 'crawler_list&page=' + page,
+		data: 'domain=' + domain + '&act=' + 'crawler_list',
 		dataType: 'json',
 		async: false,
 		success: function(data) {
