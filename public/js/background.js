@@ -7,6 +7,9 @@ var res = {}
 var msg = {}
 var base_url = "http://139.155.227.160:8082/"
 
+// shareasale
+var shareasale_urls = []
+var shareasale_is_login = false
 
 setInterval(function(){
 	$.ajax({
@@ -16,14 +19,14 @@ setInterval(function(){
 		dataType: 'json',
 		async: true,
 		success: function(data) {
-			console.log(is_run)
-			console.log(data)
-			run_time = data.run_time
+			let competitor_ = data.competitor
+			competitor_ = JSON.parse(competitor_)
+			run_time = competitor_.run_time
 			
-			if(is_run != data.is_run) {
-				if(data.is_run == 'true') {
+			if(is_run != competitor_.is_run) {
+				if(competitor_.is_run == 'true') {
 					is_run = 'true'
-					competitor(data.domain)
+					competitor(competitor_.domain)
 				} else {
 					is_run = 'false'
 				}
@@ -86,6 +89,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 		num = num - 1
 		sendResponse('收到html信息！')	
 		sleep(1000)
+	} else if(request.hasOwnProperty('shareasale')) {
+		shareasale_is_login = request.shareasale.login.is
+		console.log(request.shareasale)
+		sendResponse('1111111111111')
 	}
 })
 
@@ -120,13 +127,30 @@ function postCrawlerRes(list) {
 	return;
 }
 
-// ------------------------------------------ 爬虫 ------------------------------------------
+// ------------------------------------------ 爬虫 end ------------------------------------------
 
 
-// ------------------------------------------ 京东淘宝 ------------------------------------------
+// ------------------------------------------ shareasale ------------------------------------------
+function event_(key) {
+	let obj = null
+	$.ajax({
+		url: base_url + 'provider.php?act=init',
+		type: 'get',
+		data: {key: key},
+		dataType: 'json',
+		async: false,
+		success: function(data) {
+			obj = JSON.parse(eval("data." + key))
+		}
+	}).then(function() {
+		chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+			console.log(tabs)
+			chrome.tabs.update(tabs[0].id, {url: obj.is_logo.url}, function() {})
+		})
+	})
+}
 
-
-// ------------------------------------------ 京东淘宝 ------------------------------------------
+// ------------------------------------------ shareasale end ------------------------------------------
 
 
 

@@ -1,4 +1,4 @@
-// var bg = chrome.extension.getBackgroundPage();
+var bg = chrome.extension.getBackgroundPage();
 
 // $(function() {
 // 	$.get(bg.base_url + 'provider.php?act=competitors', {}, function(res) {
@@ -32,3 +32,8 @@
 // 	e.stopPropagation()
 // 	bg.competitor('')
 // })
+
+$('#event').click(function(e) {
+	console.log(222)
+	bg.event_('shareasale')
+})
