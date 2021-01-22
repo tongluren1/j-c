@@ -33,7 +33,7 @@ var bg = chrome.extension.getBackgroundPage();
 // 	bg.competitor('')
 // })
 
-$('#event').click(function(e) {
-	console.log(222)
-	bg.event_('shareasale')
-})
+// $('#event').click(function(e) {
+// 	console.log(222)
+// 	bg.event_('shareasale')
+// })

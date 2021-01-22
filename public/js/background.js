@@ -2,13 +2,17 @@ var num = 0
 var start_time = null
 var end_time = null
 var run_time = 20000
+var tab_interval_time = 1500
+var urls_interval_time = 2000
 var is_run = 'false'
 var res = {}
 var msg = {}
-var base_url = "http://139.155.227.160:8082/"
+var base_url = "http://c-bcg.bwe.io/plug_in/"
+var task_url = "http://c-bcg.bwe.io/sc_pro/api/index.php/"
+var task_id = null
 
 // shareasale
-var shareasale_urls = []
+var shareasale_run = false
 var shareasale_is_login = false
 
 setInterval(function(){
@@ -22,11 +26,13 @@ setInterval(function(){
 			let competitor_ = data.competitor
 			competitor_ = JSON.parse(competitor_)
 			run_time = competitor_.run_time
+			tab_interval_time = competitor_.tab_interval_time
+			urls_interval_time = competitor_.urls_interval_time
 			
 			if(is_run != competitor_.is_run) {
 				if(competitor_.is_run == 'true') {
 					is_run = 'true'
-					competitor(competitor_.domain)
+					competitor()
 				} else {
 					is_run = 'false'
 				}
@@ -36,86 +42,78 @@ setInterval(function(){
 }, 1000)
 
 // ------------------------------------------ 爬虫 ------------------------------------------
-async function competitor(domain) {
-	
+async function competitor() {
 	start_time = (new Date()).getTime()
 	
-	msg = await getCrawlerList(base_url, domain)
-	
-	console.log(msg)
-	for (let domain in msg) {	
-		for (let i in msg[domain]) {
-			chrome.tabs.create({url: msg[domain][i]}, function(tab) {
-				res[tab.id] = {domain: domain, url: msg[domain][i]}
+	$.ajax({
+		url: task_url + 'GetTask?client_id=plug_in&task_type=get_page_content',
+		// url: base_url + 'provider.php?act=aaaaaaaaaaaaaaa',
+		type: 'get',
+		data: {},
+		dataType: 'json',
+		async: true,
+		success: function(data) {
+			if(data.results.hasOwnProperty('task_id')) {
+				task_id = data.results.task_id
+				msg = data.results.urls.url	
+			}
+		}
+	}).then(function() {
+		for (let k in msg) {
+			chrome.tabs.create({url: msg[k]}, function(tab) {
+				console.log(tab)
+				res[tab.id] = {url: msg[k]}
 			})
 			num = num + 1
-			sleep(1000)
-		}
-	}
-	
-	let interval = setInterval(async function() {
-		end_time = (new Date()).getTime()
-		if((end_time - start_time) >= run_time && num > 0) {
-			for (let tab_id in res) {
-				if(typeof res[tab_id]['html'] == 'undefined') {
-					res[tab_id]['html'] = 'empty content'
-					chrome.tabs.remove(parseInt(tab_id))
-				}
-			}
-			num = 0
+			sleep(tab_interval_time)
 		}
 		
-		console.log('pachong setInterval ---> ' + num)
-		if(num == 0) {
-			console.log(res)
-			await postCrawlerRes(res)
-			res = {}
-			if(is_run == 'true') {
-				setTimeout(function(){
-					competitor(domain)
-				}, 2000)	
+		let interval = setInterval(async function() {
+			end_time = (new Date()).getTime()
+			if((end_time - start_time) >= run_time && num > 0) {
+				for (let tab_id in res) {
+					if(typeof res[tab_id]['html'] == 'undefined') {
+						res[tab_id]['html'] = 'empty content'
+						res[tab_id]['code'] = '404'
+						chrome.tabs.remove(parseInt(tab_id))
+					}
+				}
+				num = 0
 			}
-			clearInterval(interval)
-		}
-	}, 1000)
+			
+			console.log('pachong setInterval ---> ' + num)
+			if(num == 0) {
+				console.log(res)
+				await postCrawlerRes(res)
+				res = {}
+				if(is_run == 'true') {
+					setTimeout(function(){
+						competitor()
+					}, urls_interval_time)
+				}
+				clearInterval(interval)
+			}
+		}, 1000)
+	})
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	if(num > 0 && request.hasOwnProperty('html') && typeof res[sender.tab.id] != 'undefined') {
-		console.log('pachong')
 		res[sender.tab.id]['html'] = request.html
-		console.log(sender.tab.id)
+		res[sender.tab.id]['code'] = request.code
+		sendResponse('收到html信息！')
 		chrome.tabs.remove(sender.tab.id)
 		num = num - 1
-		sendResponse('收到html信息！')	
-		sleep(1000)
+		// sleep(1000)
 	} else if(request.hasOwnProperty('shareasale')) {
 		shareasale_is_login = request.shareasale.login.is
-		console.log(request.shareasale)
-		sendResponse('1111111111111')
+		sendResponse('background 收到')
 	}
 })
 
-function getCrawlerList(base_url, domain) {
-	let res_ = null
-	$.ajax({
-		url: base_url + 'provider.php',
-		type: 'get',
-		data: 'domain=' + domain + '&act=' + 'crawler_list',
-		dataType: 'json',
-		async: false,
-		success: function(data) {
-			res_ = data;
-		} 
-	});
-	return res_;
-}
-
 function postCrawlerRes(list) {
-	console.log(list)
-	let res_ = null
 	$.ajax({
-		url: base_url + 'provider.php?act=crawler_res',
+		url: base_url + 'provider.php?act=crawler_res&task_id=' + task_id,
 		type: 'post',
 		data: {data: list},
 		dataType: 'json',
@@ -140,28 +138,18 @@ function event_(key) {
 		dataType: 'json',
 		async: false,
 		success: function(data) {
-			obj = JSON.parse(eval("data." + key))
+			obj = JSON.parse(data.shareasale)
+			console.log(obj)
 		}
 	}).then(function() {
 		chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
 			console.log(tabs)
-			chrome.tabs.update(tabs[0].id, {url: obj.is_logo.url}, function() {})
+			chrome.tabs.update(tabs[0].id, {url: obj.url}, function() {})
 		})
 	})
 }
 
 // ------------------------------------------ shareasale end ------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
 
 
 //第一种，使用while循环

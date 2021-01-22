@@ -22,6 +22,7 @@ $(function(){
 						for (let i=0; i<node_list.length; i++) {
 							url_list.push(node_list[i].href)
 						}
+						url_list.push(location.href)
 						console.log(url_list)
 						let url_tmp = url_list.pop()
 						localStorage.setItem('url-list', JSON.stringify(url_list))
@@ -76,13 +77,39 @@ $(function(){
 						}
 					}
 				}
+			} else {
+				localStorage.removeItem('url-list')
+				localStorage.removeItem('shareasale-login')
+				localStorage.removeItem('shareasale-msg')
+				chrome.runtime.sendMessage({
+					shareasale: {
+						login: 'nologin',
+						msg: '没有登录'
+					}
+				}, res => {
+					console.log('shareasale 收到: ' + res)
+				})
 			}
 		}, 2000)
 	} else {
-		chrome.runtime.sendMessage({
-		    html: document.documentElement.outerHTML
-		}, res => {
-		    console.log('收到: ' + res)
-		})
+		let x = new XMLHttpRequest()
+		x.open('GET', document.location)
+		x.send(null)
+		x.onreadystatechange = function () {
+		   if (x.readyState==4) {
+				chrome.runtime.sendMessage({
+					html: zip(document.documentElement.outerHTML),
+					code: x.status
+				}, res => {
+					console.log('收到: ' + res)
+				})
+		  　}
+		}
 	}
 })
+
+// 压缩
+function zip(str) {
+	const binaryString = pako.gzip(encodeURIComponent(str), {to: 'string'})
+	return btoa(binaryString);
+}
