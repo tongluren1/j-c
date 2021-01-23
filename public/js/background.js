@@ -4,7 +4,7 @@ var end_time = null
 var run_time = 20000
 var tab_interval_time = 1500
 var urls_interval_time = 2000
-var is_run = 'false'
+var is_run = '2'
 var res = {}
 var msg = {}
 var base_url = "http://c-bcg.bwe.io/plug_in/"
@@ -15,9 +15,12 @@ var task_id = null
 var shareasale_run = false
 var shareasale_is_login = false
 
+// extension id
+var extension_id = chrome.runtime.id
+
 setInterval(function(){
 	$.ajax({
-		url: base_url + 'provider.php?act=init',
+		url: base_url + 'provider.php?act=init&type=competitor',
 		type: 'get',
 		data: {},
 		dataType: 'json',
@@ -25,16 +28,21 @@ setInterval(function(){
 		success: function(data) {
 			let competitor_ = data.competitor
 			competitor_ = JSON.parse(competitor_)
+			competitor_ = competitor_[extension_id]
+			
+			console.log(competitor_.is_run)
+			console.log(typeof competitor_.is_run)
+			
 			run_time = competitor_.run_time
 			tab_interval_time = competitor_.tab_interval_time
 			urls_interval_time = competitor_.urls_interval_time
 			
 			if(is_run != competitor_.is_run) {
-				if(competitor_.is_run == 'true') {
-					is_run = 'true'
+				if(competitor_.is_run == '1') {
+					is_run = '1'
 					competitor()
 				} else {
-					is_run = 'false'
+					is_run = '2'
 				}
 			}
 		} 
@@ -86,7 +94,7 @@ async function competitor() {
 				console.log(res)
 				await postCrawlerRes(res)
 				res = {}
-				if(is_run == 'true') {
+				if(is_run == '1') {
 					setTimeout(function(){
 						competitor()
 					}, urls_interval_time)
