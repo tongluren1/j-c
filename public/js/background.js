@@ -123,7 +123,7 @@ function postCrawlerRes(list) {
 	$.ajax({
 		url: base_url + 'provider.php?act=crawler_res&task_id=' + task_id,
 		type: 'post',
-		data: {data: list},
+		data: {data: list, extension_id: extension_id},
 		dataType: 'json',
 		async: true,
 		success: function(data) {
