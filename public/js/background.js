@@ -29,10 +29,7 @@ setInterval(function(){
 			let competitor_ = data.competitor
 			competitor_ = JSON.parse(competitor_)
 			competitor_ = competitor_[extension_id]
-			
-			console.log(competitor_.is_run)
-			console.log(typeof competitor_.is_run)
-			
+						
 			run_time = competitor_.run_time
 			tab_interval_time = competitor_.tab_interval_time
 			urls_interval_time = competitor_.urls_interval_time
@@ -47,7 +44,7 @@ setInterval(function(){
 			}
 		} 
 	});
-}, 1000)
+}, 60000)
 
 // ------------------------------------------ 爬虫 ------------------------------------------
 async function competitor() {
@@ -69,7 +66,6 @@ async function competitor() {
 	}).then(function() {
 		for (let k in msg) {
 			chrome.tabs.create({url: msg[k]}, function(tab) {
-				console.log(tab)
 				res[tab.id] = {url: msg[k]}
 			})
 			num = num + 1
@@ -89,9 +85,7 @@ async function competitor() {
 				num = 0
 			}
 			
-			console.log('pachong setInterval ---> ' + num)
 			if(num == 0) {
-				console.log(res)
 				await postCrawlerRes(res)
 				res = {}
 				if(is_run == '1') {
