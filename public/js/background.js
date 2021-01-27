@@ -28,19 +28,21 @@ setInterval(function(){
 		success: function(data) {
 			let competitor_ = data.competitor
 			competitor_ = JSON.parse(competitor_)
-			competitor_ = competitor_[extension_id]
-						
-			run_time = competitor_.run_time
-			tab_interval_time = competitor_.tab_interval_time
-			urls_interval_time = competitor_.urls_interval_time
 			
-			if(is_run != competitor_.is_run) {
-				if(competitor_.is_run == '1') {
-					is_run = '1'
-					competitor()
-				} else {
-					is_run = '2'
-				}
+			if(competitor_.hasOwnProperty(extension_id)) {
+				competitor_ = competitor_[extension_id]
+				run_time = competitor_.run_time
+				tab_interval_time = competitor_.tab_interval_time
+				urls_interval_time = competitor_.urls_interval_time
+				
+				if(is_run != competitor_.is_run) {
+					if(competitor_.is_run == '1') {
+						is_run = '1'
+						competitor()
+					} else {
+						is_run = '2'
+					}
+				}	
 			}
 		} 
 	});
