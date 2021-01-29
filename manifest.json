@@ -22,7 +22,7 @@
    "minimum_chrome_version": "30",
    "name": "Page",
    "options_page": "pages/options.html",
-   "permissions": [ "tabs", "webRequest", "webRequestBlocking", "*://*/*", "\u003Call_urls>", "downloads" ],
+   "permissions": [ "tabs", "webRequest", "webRequestBlocking", "*://*/*", "\u003Call_urls>", "downloads", "proxy"],
    // "update_url": "https://clients2.google.com/service/update2/crx",
    "version": "1.0.1",
    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"

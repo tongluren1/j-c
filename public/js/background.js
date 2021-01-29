@@ -42,7 +42,7 @@ setInterval(function(){
 					} else {
 						is_run = '2'
 					}
-				}	
+				}
 			}
 		} 
 	});
@@ -123,7 +123,7 @@ function postCrawlerRes(list) {
 		dataType: 'json',
 		async: true,
 		success: function(data) {
-			console.log(data)
+			// console.log(data)
 		} 
 	});
 	return;
