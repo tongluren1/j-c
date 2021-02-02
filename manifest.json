@@ -11,7 +11,7 @@
       "128": "public/img/icon.png",
       "40": "public/img/icon.png",
       "48": "public/img/icon.png"
-   },
+	},
 	"content_scripts": [ {
 			"matches": [ "<all_urls>" ],
 			"js": [ "/public/js/jquery.min.js", "/public/js/pako.js", "/public/js/content.js" ],
