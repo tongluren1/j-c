@@ -14,6 +14,8 @@ var task_id = null
 var proxy_ip = null
 var proxy_port = null
 
+var tmp_run_times = [3, 4]
+
 // shareasale
 var shareasale_run = false
 var shareasale_is_login = false
@@ -21,34 +23,39 @@ var shareasale_is_login = false
 // extension id
 var extension_id = chrome.runtime.id
 
-setInterval(function(){	
-	$.ajax({
-		url: base_url + 'provider.php?act=init&type=competitor',
-		type: 'get',
-		data: {},
-		dataType: 'json',
-		async: true,
-		success: function(data) {
-			let competitor_ = data.competitor
-			competitor_ = JSON.parse(competitor_)
-			
-			if(competitor_.hasOwnProperty(extension_id)) {
-				competitor_ = competitor_[extension_id]
-				run_time = competitor_.run_time
-				tab_interval_time = competitor_.tab_interval_time
-				urls_interval_time = competitor_.urls_interval_time
+setInterval(function(){
+	let hour = (new Date()).getHours()
+	if (tmp_run_times.indexOf(hour) >= 0) {
+		$.ajax({
+			url: base_url + 'provider.php?act=init&type=competitor',
+			type: 'get',
+			data: {},
+			dataType: 'json',
+			async: true,
+			success: function(data) {
+				let competitor_ = data.competitor
+				competitor_ = JSON.parse(competitor_)
 				
-				if(is_run != competitor_.is_run) {
-					if(competitor_.is_run == '1') {
-						is_run = '1'
-						competitor()
-					} else {
-						is_run = '2'
+				if(competitor_.hasOwnProperty(extension_id)) {
+					competitor_ = competitor_[extension_id]
+					run_time = competitor_.run_time
+					tab_interval_time = competitor_.tab_interval_time
+					urls_interval_time = competitor_.urls_interval_time
+					
+					if(is_run != competitor_.is_run) {
+						if(competitor_.is_run == '1') {
+							is_run = '1'
+							competitor()
+						} else {
+							is_run = '2'
+						}
 					}
 				}
-			}
-		} 
-	});
+			} 
+		});	
+	} else {
+		is_run = '2'
+	}
 }, 60000)
 
 // ------------------------------------------ 爬虫 ------------------------------------------
