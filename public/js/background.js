@@ -9,7 +9,6 @@ var res = {}
 var msg = {}
 var base_url = null
 var task_url = null
-var proxy_url = null
 var task_id = null
 var proxy_ip = null
 var proxy_port = null
@@ -102,7 +101,38 @@ async function competitor() {
 				res = {}
 				if(is_run == '1') {
 					setTimeout(function(){
-						competitor()
+						$.ajax({
+							url: 'http://127.0.0.1:9090/proxies',
+							type: "GET",
+							data: '',
+							success: function(res) {
+								while(true) {
+									let names = Object.keys(res.proxies)
+									let name = names[Math.floor((Math.random()*names.length))]
+									if (res.proxies[name].history.length && res.proxies[name].history[res.proxies[name].history.length - 1].delay > 0 && res.proxies[name].history[res.proxies[name].history.length - 1].delay < 1000) {
+										$.ajax({
+											url: 'http://127.0.0.1:9090/proxies/%F0%9F%94%B0%20%E8%8A%82%E7%82%B9%E9%80%89%E6%8B%A9',
+											type: "PUT",
+											contentType: "application/json",
+											data: '{"name":"'+name+'"}',
+											success: function(res) {
+												console.log('代理：' + name)
+												competitor()
+											},
+											error: function(error) {
+												console.log('url error: http://127.0.0.1:9090/proxies/%F0%9F%94%B0%20%E8%8A%82%E7%82%B9%E9%80%89%E6%8B%A9')
+												competitor()
+											}
+										});
+										break
+									}
+								}		
+							},
+							error: function(error) {
+								console.log('url error: http://127.0.0.1:9090/proxies')
+								competitor()
+							}
+						})
 					}, urls_interval_time)
 				}
 				clearInterval(interval)
